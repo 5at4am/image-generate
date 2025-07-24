@@ -65,6 +65,20 @@ def enhance_prompt(user_prompt):
     response = make_request("post", url, headers=JSON_HEADERS, json=payload)
     return response["choices"][0]["message"]["content"] if response else None
 
+# --- CHAT HELPER FUNCTION ---
+def get_chat_completion(messages, model):
+    """Handles the API call for the chat completion feature."""
+    url = "https://api.a4f.co/v1/chat/completions"
+    payload = {"model": model, "messages": messages}
+    response = make_request("post", url, headers=JSON_HEADERS, json=payload)
+    
+    # Check for a valid response before trying to access its content
+    if response and "choices" in response and response["choices"]:
+        return response["choices"][0]["message"]["content"]
+    else:
+        # Return a friendly error message if the response is invalid or empty
+        return "Sorry, I couldn't get a response. Please check the error messages above."
+
 # --- Helper: Image Generator with Retry ---
 def generate_image(payload, max_retries=3):
     url = "https://api.a4f.co/v1/images/generations"
@@ -119,10 +133,70 @@ def get_usage(start_date, end_date):
 
 # --- UI: Title & Tabs ---
 st.title("A4F API Suite")
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
-    "🖼️ Image Generation", "🎨 Image Edits", "🔡 Embeddings", "🗣️ Text-to-Speech",
+tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+    "💬 Chat", "🖼️ Image Generation", "🎨 Image Edits", "🔡 Embeddings", "🗣️ Text-to-Speech",
     "🎤 Speech-to-Text", "🎬 Video Generation", "📦 List Models", "📊 Get Usage"
 ])
+# --- UI: Chat Tab ---
+with tab0:
+    st.header("💬 Chat Completion")
+    chat_model = st.selectbox("Choose a chat model", [
+        "provider-2/gpt-3.5-turbo",
+        "provider-1/gemma-3-12b-it",
+        "provider-1/gemma-2-27b-it",
+        "provider-1/gemini-2.0-flash-lite-001",
+        "provider-2/gemini-2.0-flash",
+        "provider-6/gemini-2.5-flash",
+        "provider-6/gemini-2.5-flash-thinking",
+        "provider-3/gpt-4o-mini",
+        "provider-3/gpt-4",
+        "provider-6/gpt-4.1-mini",
+        "provider-6/gpt-4.1-nano",
+        "provider-6/gpt-4o-mini-search-preview",
+        "provider-6/gpt-4o",
+        "provider-6/o3-high",
+        "provider-6/gpt-4.1",
+        "provider-1/llama-3.3-70b-instruct-turbo",
+        "provider-2/codestral",
+        "provider-1/llama-4-maverick-17b-128e",
+        "provider-2/llama-4-maverick",
+        "provider-2/llama-4-scout",
+        "provider-3/llama-3.2-3b",
+        "provider-3/llama-3.3-70b",
+        "provider-2/qwq-32b",
+        "provider-3/qwen-3-235b-a22b-2507",
+        "provider-3/deepseek-v3",
+        "provider-3/deepseek-v3-0324",
+        "provider-6/kimi-k2",
+        "provider-3/qwen-3-235b-a22b",
+        "provider-6/minimax-m1-40k"
+
+    ], key="chat_model")
+    
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Display chat messages from history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Accept user input
+    if prompt := st.chat_input("What is up?"):
+        # Add user message to history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Get assistant response
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = get_chat_completion(st.session_state.messages, chat_model)
+                st.markdown(response)
+        
+        # Add assistant response to history
+        st.session_state.messages.append({"role": "assistant", "content": response})
 
 # --- UI: Image Generation Tab ---
 with tab1:
