@@ -70,12 +70,19 @@ MODELS = [
     "provider-4/imagen-3",
     "provider-4/imagen-4",
     "provider-1/FLUX.1-schnell",
+    "provider-2/FLUX.1-schnell",
+    "provider-3/imagen-3.0-generate-002",
+    "provider-3/imagen-4.0-generate-preview-06-06",
     "provider-6/sana-1.5-flash",
-    "provider-4/imagen-3",
     "provider-2/dall-e-3",
     "provider-6/sana-1.5",
-    "provider-2/FLUX.1-dev",
-    "provider-1/FLUX.1.1-pro"
+    "provider-3/FLUX.1-dev",
+    "provider-6/FLUX.1.1-pro",
+    "provider-1/FLUX.1.1-pro",
+    "provider-6/FLUX.1-kontext-dev",
+    "provider-1/FLUX.1-kontext-pro",
+    "provider-6/FLUX.1-kontext-max",
+    "provider-2/FLUX.1-schnell-v2"
 ]
 
 model   = st.selectbox("Choose image model", MODELS)
